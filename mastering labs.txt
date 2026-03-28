@@ -1,0 +1,150 @@
+MASTERING NEW LABS:
+
+config t
+no logging console
+int gi 2
+no shut
+ip add 192.168.102.11 255.255.255.0
+!@telnet use secureCRT: telnet 192.168.108.5
+!in SEcureCRT, Paste This:
+config t
+IP ROUTE 0.0.0.0  0.0.0.0 208.8.8.2
+ip name-server 8.8.8.8 1.1.1.1
+ip domain lookup
+int gi 1
+no shut
+ip add 208.8.8.11 255.255.255.0
+int gi 3
+no shut
+ip add 192.168.103.11 255.255.255.0
+line vty 0 14
+ transport input all
+ exec-timeout 0 0
+do sh ip int brief
+
+
+
+!@R1-ENCOR
+conf t
+ service password-encryption
+ no logging cons
+ no ip domain lookup
+ line vty 0 14
+  transport input all
+  password pass
+  login local
+  exec-timeout 0 0
+  username admin priv 15 secret pass
+ int g1
+  ip add 208.8.8.11 255.255.255.0
+  no shut
+ int g2
+  ip add 192.168.102.11 255.255.255.0
+  no shut
+ int g3
+ ip add 192.168.103.11 255.255.255.0
+  no shut
+ !
+ ip route 0.0.0.0 0.0.0.0 208.8.8.2
+ !
+ ip domain lookup
+ ip name-server 8.8.8.8 1.1.1.1
+ !
+
+
+!@R2-ENCOR
+conf t
+ service password-encryption
+ no logging cons
+ no ip domain lookup
+ line vty 0 14
+  transport input all
+  password pass
+  login local
+  exec-timeout 0 0
+  username admin priv 15 secret pass
+ int g1
+  ip add 208.8.8.12 255.255.255.0
+  no shut
+ int g2
+  ip add 192.168.102.12 255.255.255.0
+  no shut
+ int g3
+ ip add 192.168.103.12 255.255.255.0
+  no shut
+ !
+ ip route 0.0.0.0 0.0.0.0 208.8.8.2
+ !
+ ip domain lookup
+ ip name-server 8.8.8.8 1.1.1.1
+ !
+
+
+!@R3-CONVERGE
+conf t
+ service password-encryption
+ no logging cons
+ no ip domain lookup
+ line vty 0 14
+  transport input all
+  password pass
+  login local
+  exec-timeout 0 0
+  username admin priv 15 secret pass
+ int g1
+  ip add 208.8.8.13 255.255.255.0
+  no shut
+ int g2
+  ip add 192.168.102.13 255.255.255.0
+  no shut
+ int g3
+ ip add 192.168.103.13 255.255.255.0
+  no shut
+ !
+ ip route 0.0.0.0 0.0.0.0 208.8.8.2
+ !
+ ip domain lookup
+ ip name-server 8.8.8.8 1.1.1.1
+ !
+line vty 0 14
+ transport input all
+ exec-timeout 0 0
+
+
+LAB 5: HSRP or GLBP
+config t
+!@TAAS:
+conf t
+hostname  CoreTaas-PLDT
+track 1 int  gi 0/1 line-protocol
+int vlan 1
+standby 1 ip 10.21.1.6
+standby 1 preempt
+standby 1 priority 150
+standby 1 track 1 decrement 60
+end
+sh standby
+
+!@BABA:
+conf t
+hostname  CoreTaas-Globe
+track 1 int  gi 0/1 line-protocol
+int vlan 1
+standby 1 ip 10.21.1.6
+standby 1 preempt
+standby 1 priority 100
+end
+sh standby
+
+
+LinuxMINIPC:
+sudo su
+ifconfig eth0 192.168.102.100 netmask 255.255.255.0 up
+route add default gw 192.168.102.7
+ping 192.168.102.11
+
+sudo su
+ifconfig eth0 192.168.103.101 netmask 255.255.255.0 up
+route add default gw 192.168.103.7
+ping 192.168.103.7
+
